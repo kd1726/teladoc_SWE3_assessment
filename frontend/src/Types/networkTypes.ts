@@ -1,7 +1,7 @@
 import { AxiosHeaders } from "axios"
 
 interface HTTPClientType {
-  customHeaders?: AxiosHeaders | null
+  customHeaders?: Record<string, string>
 }
 
 export {

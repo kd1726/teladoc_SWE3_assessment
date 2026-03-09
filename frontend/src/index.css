@@ -1,12 +1,8 @@
 @import "tailwindcss";
 @import "./Components/Login/StyleSheets/Desktop/login.css";
-@import "./Components/Login/StyleSheets/Mobile/login.css";
 @import "./Components/Dashboards/Stylesheets/Desktop/dashboard.css";
-@import "./Components/Dashboards/StyleSheets/Mobile/dashboard.css";
 @import "./Components/General/Navigation/StyleSheets/Desktop/navigation.css";
-@import "./Components/General/Navigation/StyleSheets/Mobile/navigation.css";
 @import "./Components/General/DashboardElements/StyleSheets/Desktop/elements.css";
-@import "./Components/General/DashboardElements/StyleSheets/Mobile/elements.css";
 @import "./Components/General/DashboardElements/StyleSheets/Desktop/admin-elements.css";
 
 :root {

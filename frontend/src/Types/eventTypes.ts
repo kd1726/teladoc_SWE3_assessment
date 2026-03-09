@@ -1,10 +1,10 @@
 interface UsageEventResponseType {
   event_id: string;
   tenant_id: string;
-  type: string;
+  type: EventType;
   amountOfTokens: number;
   prompt: string;
-  timestamp: string
+  timestamp: Date | string
 }
 
 enum StatusEnum {
@@ -28,6 +28,7 @@ interface UsageEventSubmitType {
   event_id: string;
   tenant_id: string;
   type: EventType;
+  idempotency_key: string;
   amountOftokens: number;
   prompt: string;
   timestamp: Date | string

@@ -6,6 +6,7 @@ import { UsageEventResponseType } from "@/Types/eventTypes"
 import { ViewAllTenants } from "../BuilderComps/Desktop/Admin/ViewAllTenants"
 import TenantDashboard from "./TenantDashboard"
 import { UpdateTenantQuota } from "../BuilderComps/Desktop/Admin/UpdateTenentQuota"
+import { AuthClient } from "@/Components/Clients/Auth/authClient"
 
 export default function AdminDashboard(): JSX.Element {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)

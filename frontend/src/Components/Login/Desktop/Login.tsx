@@ -1,13 +1,38 @@
 import { JSX } from "react";
+import { AuthClient } from "@/Components/Clients/Auth/authClient";
+import { AuthType } from "@/Types/authTypes";
 import { REACT_BASE_URL } from "@/Config/config";
+import { jwtDecode } from "jwt-decode";
+import { JWTToken } from "@/Types/authTypes";
 
 export default function Login(): JSX.Element {
 
-  const handleSubmit: (e: React.SubmitEvent) => void = (e: React.SubmitEvent) => {
+  const handleSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Check if token is valid and authentication. If not redirect back to homepage is so render this compoentn")
-    console.log("if user is admin redirect to /dashboard/admin else /dashboard")
-    window.location.href = `${REACT_BASE_URL}/dashboard`
+    const loginData: AuthType = {
+      username: e.currentTarget.username.value,
+      password: e.currentTarget.password.value
+    }
+
+    AuthClient(loginData).then((res) => {
+      let { access_token, token_type } = res.data
+      access_token && localStorage.setItem("accessToken", access_token)
+      token_type && localStorage.setItem("tokenTyoe", token_type)
+
+      let { role, tenant_id } = jwtDecode<JWTToken>(access_token)
+
+      role && localStorage.setItem("role", role)
+      tenant_id && localStorage.setItem("tenantId", tenant_id)
+      return role
+    }).then(role => {
+      if (role == "admin") {
+        window.location.href = `${REACT_BASE_URL}/dashboard/admin`
+      } else {
+        window.location.href = `${REACT_BASE_URL}/dashboard`
+      }
+    }).catch((ers) => {
+      console.log(ers)
+    })
   }
 
   return <div className="desktop-login-container">

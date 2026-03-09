@@ -33,7 +33,7 @@ export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ te
     </article>
     <article className="reason-section">
       <label>Change Reason:</label>
-      <textarea name="reason" onChange={handleChange} maxLength={500} required />
+      <textarea name="reason" onChange={handleChange} minLength={10} maxLength={500} required />
     </article>
     <article className="submit-section">
       <section className="checkbox-section">

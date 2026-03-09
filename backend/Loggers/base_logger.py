@@ -1,7 +1,7 @@
 import logging
 import colorlog
 from colorlog import ColoredFormatter
-from Utils.utils import is_debug
+from Config.config import is_debug
 
 class BaseLogger:
   @classmethod
