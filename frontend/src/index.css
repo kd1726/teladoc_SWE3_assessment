@@ -1,0 +1,46 @@
+@import "tailwindcss";
+@import "./Components/Login/StyleSheets/Desktop/login.css";
+@import "./Components/Login/StyleSheets/Mobile/login.css";
+@import "./Components/Dashboards/Stylesheets/Desktop/dashboard.css";
+@import "./Components/Dashboards/StyleSheets/Mobile/dashboard.css";
+@import "./Components/General/Navigation/StyleSheets/Desktop/navigation.css";
+@import "./Components/General/Navigation/StyleSheets/Mobile/navigation.css";
+@import "./Components/General/DashboardElements/StyleSheets/Desktop/elements.css";
+@import "./Components/General/DashboardElements/StyleSheets/Mobile/elements.css";
+@import "./Components/General/DashboardElements/StyleSheets/Desktop/admin-elements.css";
+
+:root {
+  --desktop-title-font-size: 2vw;
+  --mobile-title-font-size: 1rem;
+  --desktop-subtitle-font-size: 1.5vw;
+  --mobile-subtitle-font-size: 0.8rem;
+  --desktop-text-font-size: 1vw;
+  --mobile-text-font-size: 0.675rem;
+  --desktop-button-font-size: 1.5vw;
+  --mobile-button-font-size: 0.675rem
+}
+
+@theme {
+  --color-teladoc-purple: oklch(42% 0.16 320);
+  --color-teladoc-pulse: oklch(51.64% 0.267 282.87);
+  --color-teladoc-pulse-light: oklch(40% 0.267 282.87);
+}
+
+@layer base {
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  div#root {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  div.base-container {
+    @apply p-0 m-0 w-screen h-screen flex flex-col overflow-hidden;
+  }
+}

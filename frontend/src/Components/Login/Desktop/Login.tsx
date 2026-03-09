@@ -1,0 +1,33 @@
+import { JSX } from "react";
+import { REACT_BASE_URL } from "@/Config/config";
+
+export default function Login(): JSX.Element {
+
+  const handleSubmit: (e: React.SubmitEvent) => void = (e: React.SubmitEvent) => {
+    e.preventDefault();
+    console.log("Check if token is valid and authentication. If not redirect back to homepage is so render this compoentn")
+    console.log("if user is admin redirect to /dashboard/admin else /dashboard")
+    window.location.href = `${REACT_BASE_URL}/dashboard`
+  }
+
+  return <div className="desktop-login-container">
+    <main className="login-container">
+      <section className="title">
+        <h1>Tenant Quota Dashboard</h1>
+      </section>
+      <form className="credentials" onSubmit={handleSubmit} data-testid="login-form">
+        <article className="field-container">
+          <label>User Name:</label>
+          <input type="text" name="username" data-testid="username-field" required />
+        </article>
+        <article className="field-container">
+          <label>Password:</label>
+          <input type="password" name="password" data-testid="password-field" required />
+        </article>
+        <article className="submit-container">
+          <input type="submit" role="button" data-testid="submit-button" value="Authenticate" />
+        </article>
+      </form>
+    </main>
+  </div>
+}

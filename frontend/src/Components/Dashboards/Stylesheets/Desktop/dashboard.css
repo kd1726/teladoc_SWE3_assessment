@@ -1,0 +1,7 @@
+div.desktop-dashboard {
+  @apply w-[95%] h-screen mt-5 grid grid-cols-2 grid-rows-2 gap-x-[5vw] gap-y-[1vw] pl-[2%];
+}
+
+div.admin-desktop-dashboard {
+  @apply w-[95%] h-screen mt-5 grid grid-cols-2 grid-rows-2 gap-x-[5vw] gap-y-[1vw] pl-[2%];
+}

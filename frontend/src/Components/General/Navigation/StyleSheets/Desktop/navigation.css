@@ -1,0 +1,17 @@
+nav.desktop-nav {
+  @apply w-[93%] ml-[2%] mt-3 h-[5vw] flex justify-between items-center rounded-2xl bg-violet-300 px-[2%];
+
+  h1 {
+    font-size: var(--desktop-subtitle-font-size);
+  }
+
+  button {
+    @apply w-[10%] bg-teladoc-pulse-light rounded-2xl text-white p-1;
+    font-size: var(--desktop-subtitle-font-size);
+    transition: background-color 500ms;
+  }
+
+  button:hover {
+    @apply cursor-pointer bg-teladoc-pulse;
+  }
+}
