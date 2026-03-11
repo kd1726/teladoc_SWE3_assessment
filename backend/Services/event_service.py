@@ -89,7 +89,6 @@ class EventService:
       self.redis_client.create_entry(self.idempotency_key, self.event_data)
       task_job = mcp_request_event_job.s(self.user.tenant_id, duration_to_complete)
       result = self.__task_chainer(task_job).apply_async(task_id=str(self.idempotency_key))
-      print(f"Backend type: {type(result.backend)}")
       return self.event_data
     except Exception as e:
       self.redis_client.delete_entry(self.idempotency_key)
