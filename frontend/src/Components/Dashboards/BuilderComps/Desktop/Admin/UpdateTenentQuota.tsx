@@ -1,22 +1,32 @@
 import { UpdateTenantQuotaComponentType } from "@/Types/componentType";
+import { UpdateTenantType } from "@/Types/tenantTypes";
 import { useState } from "react";
+import { updateTenantQuoteClient } from "@/Components/Clients/Tenants/tenantClient";
 
 export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ tenant_id }) => {
   const [requestInProgress, setRequestInProgress] = useState<boolean>(false);
   const [reason, setReason] = useState<string>()
+  const [successMessage, setSuccessMessage] = useState<string>()
 
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setRequestInProgress(true)
-    console.log("Handle!")
-    let body = {
+    let body: UpdateTenantType = {
       reason: reason,
+      new_quota: e.currentTarget?.quota_amount?.value,
       allow_overage: e.currentTarget?.overage?.checked || false,
       tenant_id: tenant_id
     }
 
-    console.log("Make request")
-    console.log(body)
+    await updateTenantQuoteClient(tenant_id, body).then((res) => {
+      if (res.status == 202) {
+        let { status, new_quota } = res.data
+        setSuccessMessage(`${status}, New Quota for tenant ${tenant_id}: ${new_quota}`)
+      }
+    }).catch((ers) => {
+      console.error(ers)
+    })
+    setRequestInProgress(false)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -29,7 +39,7 @@ export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ te
       <label>
         New Monthly Quota Limit:
       </label>
-      <input type="number" name="quota-amount" />
+      <input type="number" name="quota_amount" />
     </article>
     <article className="reason-section">
       <label>Change Reason:</label>
@@ -40,6 +50,7 @@ export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ te
         <label>Allow Overage:</label>
         <input type="checkbox" name="overage" />
       </section>
+      {successMessage && <p>{successMessage}</p>}
       <input type="submit" role="button" value="Update" disabled={requestInProgress} />
     </article>
   </form>

@@ -1,16 +1,17 @@
-interface UsageEventResponseType {
+interface UsageEventGetResponseType {
   event_id: string;
   tenant_id: string;
-  type: EventType;
-  amountOfTokens: number;
+  prompt_type: EventType;
+  token_cost: number;
   prompt: string;
+  status: string,
+  idempotency_key: string;
   timestamp: Date | string
 }
 
 enum StatusEnum {
   complete = "COMPLETE",
   pending = "PENIDNG",
-  started = "STARTING"
 }
 
 enum EventType {
@@ -25,17 +26,16 @@ interface UsageEventStatusResponseType {
 }
 
 interface UsageEventSubmitType {
-  event_id: string;
-  tenant_id: string;
-  type: EventType;
   idempotency_key: string;
-  amountOftokens: number;
+  tenant_id: string;
   prompt: string;
-  timestamp: Date | string
+  prompt_type: string;
+  timestamp: Date | string;
+  token_cost: number;
 }
 
 export {
-  UsageEventResponseType,
+  UsageEventGetResponseType,
   UsageEventStatusResponseType,
   UsageEventSubmitType,
   EventType

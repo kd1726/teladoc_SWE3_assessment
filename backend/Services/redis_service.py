@@ -1,30 +1,31 @@
 import redis
-from Config.config import REDIS_DB, REDIS_PORT, REDIS_HOST, DEFAULT_REDIS_ENTRY_EXPIRATION
+from Config.config import settings
 from Loggers.redis_logger import RedisLogger
 from redis.exceptions import ConnectionError, TimeoutError, ResponseError
+from ipdb import set_trace
 
 class RedisService:
-  def __init__(self):
+  def __init__(self, db=settings.redis_db):
     self.redis_client= redis.Redis(
-      host = REDIS_HOST,
-      port = REDIS_PORT,
-      db = REDIS_DB,
+      host = settings.redis_host,
+      port = settings.redis_port,
+      db = db,
       decode_responses=True
     )
     self.logger = RedisLogger()
     
-  
-  def redis_ready(self):
+  @classmethod
+  def redis_ready(cls):
     try:
-      connected = self.redis.ping()
+      connected = cls.redis.ping()
       return connected
     except Exception:
-      self.logger.critical("Cannot connect to redis")
+      cls.logger.critical("Cannot connect to redis")
 
-  def create_entry(self, key, data, sub_key=None, expiration=DEFAULT_REDIS_ENTRY_EXPIRATION):
+  def create_entry(self, key, data, sub_key=None, expiration=settings.default_redis_entry_expiration):
     try:
       self.logger.info(f"Adding key {key}")
-      match(type(data)):
+      match data:
         case dict():
           self.__redis_hset(key, data, sub_key, expiration)
         case _:
@@ -42,10 +43,11 @@ class RedisService:
       return entry
     except ResponseError:
       self.logger.warning("Redis get failing. Attempting hget")
-      entry = self.__redis_hget(key, sub_key)
+      entry = self.__redis_hget(key)
       return entry
     except redis.ConnectionError:
       self.logger.error("Could not connect with redis")
+
     except Exception as e:
       self.logger.warning(f"Something is wrong with redis...")
 
@@ -59,14 +61,14 @@ class RedisService:
     except Exception as e:
       self.logger.warning(f"Something is wrong with redis delete...")
   
-  def __redis_hset(self, key, data, sub_key=None, expiration=DEFAULT_REDIS_ENTRY_EXPIRATION):
+  def __redis_hset(self, key, data, sub_key=None, expiration=settings.default_redis_entry_expiration):
     try:
       if sub_key:
         self.logger.info(f"stringifying data and adding as value of sub_key {sub_key}")
         new_data = json.dumps(data)
         self.redis_client.hset(key, sub_key, new_data)
-
-      self.redis_client.hset(key, mapping=data)
+      else:
+        self.redis_client.hset(key, mapping=data)
 
       self.logger.info(f"Successfull added {key}! Entry expires in {expiration} s.")
       self.redis_client.hexpire(key, expiration)

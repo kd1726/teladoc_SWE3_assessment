@@ -1,30 +1,30 @@
-from decouple import config
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Docker Constants
-CONTAINERIZED = config("CONTAINERIZED")
 
-# Redis Constants
-REDIS_HOST = config("REDIS_DOCKERIZED_CONNECTION_HOST" if CONTAINERIZED else "REDIS_CONNECTION_HOST")
-REDIS_PORT = config("REDIS_PORT")
-REDIS_DB = config("REDIS_DB")
-IDENPOTENT_EXPIRATION = 300
-DEFAULT_REDIS_ENTRY_EXPIRATION = 1800 # Not using as it's out of scope of this project
+class Settings(BaseSettings):
+  model_config = SettingsConfigDict(
+    env_file=".env",
+    env_file_encoding="utf-8"
+  )
 
-# Postgresql constants
-DB_NAME=config("DB_NAME")
-DB_PASSWORD=config("DB_PASSWORD")
-DB_USER=config("DB_USER")
-DB_PORT=config("DB_PORT")
+  containerized: bool
+  secret_key: SecretStr
+  debug: bool
+  version: str
+  access_token_expire: int = 15
+  algorithm: str
+  db_name: str
+  db_password: str
+  db_user: str
+  db_port: str
+  postgresql_uri: str
+  redis_host: str
+  redis_port: str
+  redis_db: int
+  default_redis_entry_expiration: int
 
-POSTGRES_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost:{DB_PORT}/{DB_NAME}"
-# APP
-SECRET_KEY=config("SECRET_KEY", False)
-
-def is_debug() -> bool:
-  return config("DEBUG_MODE", False)
-
-def version() -> str:
-  return config("VERSION", "v1")
+settings = Settings()
 
 
 

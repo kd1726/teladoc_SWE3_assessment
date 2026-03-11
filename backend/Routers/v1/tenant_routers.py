@@ -1,41 +1,44 @@
-from fastapi import APIRouter, Request, status, Depends, Query
+from fastapi import APIRouter, Request, status, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func,select
+from sqlalchemy.orm import Session
 from datetime import datetime
 from database import get_db
-from Config.config import version
-from Models.tenants_model import TenantsDB
-from Models.events_model import EventsDB
-from Services.auth_service import *
+from Config.config import settings
+from Models.Tenants.models import Tenants
+from Models.Events.models import Events
+from Schemas.v1.tenants_schemas import *
+from Services.auth_service import AuthService
+from typing import Annotated, List
 
 router = APIRouter()
 
-@router.get("")
-def get_tenants(db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
-  if user.get("role") != "admin":
+@router.get("", response_model=list[TenantGet], status_code=status.HTTP_200_OK)
+def get_all_tenants(db: Annotated[Session, Depends(get_db)], user: Annotated[Tenants, Depends(AuthService().get_current_user)]):
+  if user.role != "admin":
     raise HTTPException(status_code=403, detail="Admin access required")
   
-  tenants = db.query(TenantsDB).all()
+  tenants = db.execute(select(Tenants)).scalars().all()
   return tenants
 
-@router.get("/{tenant_id}")
-def get_tenants(tenant_id: str, db: Session = Depends(get_db), user=Depends(get_current_user)):
-  if user.get("role") != "admin" and user.get("tenant_id") != tenant_id:
+@router.get("/{tenant_id}", response_model=TenantGet, status_code=status.HTTP_200_OK)
+def get_tenant(tenant_id: str, db: Annotated[Session, Depends(get_db)], user: Annotated[Tenants, Depends(AuthService().get_current_user)]):
+
+  if user.role != "admin" and str(user.tenant_id) != tenant_id:
     raise HTTPException(status_code=403, detail="Unauthorized access to tenant data")
 
-  tenant = db.query(TenantsDB).filter(TenantsDB.tenant_id == tenant_id).first()
-  if not tenant:
+  if not user:
     raise HTTPException(status_code=404, detail="Tenant not found")
-  return tenant
+  return user
 
-@router.get("/{tenant_id}/usage")
-async def get_usage_events_from_date_range(
+@router.get("/{tenant_id}/usage", response_model=list[EventBase], status_code=status.HTTP_200_OK)
+def get_usage_events_from_date_range(
     tenant_id: str,
-    from_time: datetime = Query(...),
-    to_time: datetime = Query(...),
-    granularity: str = "day",
-    db: Session = Depends(get_db),
-    user=Depends(get_current_user)):
+    from_time: datetime,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[Tenants, Depends(AuthService().get_current_user)],
+    to_time: datetime = datetime.now,
+    granularity: str = "day"):
 
     if user.get("role") != "admin" and user.get("tenant_id") != tenant_id:
       raise HTTPException(status_code=403, detail="Unauthorized")
@@ -51,15 +54,20 @@ async def get_usage_events_from_date_range(
 
     return [{"date": r.period, "usage": r.total_usage} for r in results]
 
-@router.put("/{tenant_id}/quota")
-async def update_tenant_quota(tenant_id: str, new_quota: int, user=Depends(get_current_user), db: Session= Depends(get_db)):
-  if user.get("role") != "admin":
+@router.patch("/{tenant_id}/quota", status_code=status.HTTP_202_ACCEPTED)
+def update_tenant_quota(tenant_id: str, tenant_update_data:TenantQuotaUpdate, user: Annotated[Tenants, Depends(AuthService().get_current_user)], db: Annotated[Session, Depends(get_db)]):
+  if user.role != "admin":
     raise HTTPException(status_code=403, detail="Admin access required")
   
-  tenant = db.query(TenantsDB).filter(TenantsDB.tenant_id == tenant_id).first()
+  tenant = db.execute((Tenants).where(Tenants.tenant_id == tenant_id)).scalars().first()
+  
   if not tenant:
     raise HTTPException(status_code=404, detail="Tenant not found")
   
-  tenant.monthly_quota = new_quota
+  tenant.monthly_quota = tenant_update_data.new_quota
+  tenant.allow_overage = tenant_update_data.allow_overage
+
+  db.add(tenant)
   db.commit()
+  db.refresh()
   return {"status": "success", "new_quota": tenant.monthly_quota}

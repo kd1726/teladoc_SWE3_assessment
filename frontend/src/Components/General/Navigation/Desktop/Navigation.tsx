@@ -3,11 +3,13 @@ import { NavigationComponentType } from "@/Types/componentType"
 
 export const Navigation: React.FC<NavigationComponentType> = ({ isAdmin = false }) => {
 
-  useEffect(() => {
 
-  }, [])
   const handleLogout = () => {
-    console.log("Expire jwt token")
+    localStorage.removeItem("accessToken")
+    localStorage.removeItem("tenantId")
+    localStorage.removeItem("role")
+    localStorage.removeItem("tokenType")
+    window.location.replace("/")
   }
 
   return <nav className="desktop-nav">

@@ -1,42 +1,58 @@
 from fastapi import APIRouter, Request, status, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
-from Models.events_model import EventsDB
+from Models.Events.models import Events
+from Models.Tenants.models import Tenants
 from Schemas.v1.events_schemas import EventPost
+from Schemas.v1.tenants_schemas import TenantGet
+from typing import Annotated
+from Services.auth_service import AuthService
+from Services.event_service import EventService
 import uuid
-
+from Services.redis_service import RedisService
+from Loggers.base_logger import BaseLogger
+from ipdb import set_trace
 router = APIRouter()
 
-@router.post("/{tenent_id}/usage/event")
-async def post_event(tenant_id: str, event_data: EventPost, status_code=status.HTTP_201_CREATED):
-  if not event_data.allow_overage:
-    tenant = db.query(TenantsDB).filter(TenantsDB.tenant_id == tenant_id).first()
-    if tenant and tenant.current_usage + event_data.token_cost > tenant.monthly_quota:
-      raise HTTPException(
-        status_code=status.HTTP_402_PAYMENT_REQUIRED,
-        detail="Quota exceeded. Enable overage or upgrade plan."
-      )
-  
-  new_event = EventsDB(
-    event_id=uuid.uuid4(),
-    tenant_id=tenant_id,
-    prompt_type=event_data.prompt_type,
-    token_cost=event_data.token_cost,
-    timestamp=event_data.timestamp or datetime.utcnow(),
-    idempotency_key=event_data.idempotency_key
-  )
+@router.post("/{tenent_id}/usage/event", status_code=status.HTTP_201_CREATED, response_model=EventPost)
+def post_event(tenent_id: str, event_data: EventPost, db:Annotated[Session, Depends(get_db)], current_user:Annotated[Tenants, Depends(AuthService().get_current_user)]):
+  current_user = TenantGet.model_validate(current_user)
+  event_data = event_data.model_dump(mode="json")
+
   try:
-    db.add(new_event)
+    event_service = EventService(current_user, event_data)
+    r = RedisService()
+    response = None
 
-    db.query(TenantsDB).filter(TenantsDB.tenant_id == tenant_id).update({
-      "current_usage": TenantsDB.current_usage + event_in.token_cost
-    })
-          
-    db.commit()
-    return {"status": "recorded", "event_id": new_event.event_id}
+    set_trace()
+    if event_service.no_more_quota():
+      BaseLogger.error("Quota exceeded. Enable overage or upgrade plan.")
+      raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Quota exceeded. Enable overage or upgrade plan."
+        )
+  
 
+    # When user already made a request that's pending search via idempotency key
+    if event_service.event_is_pending():
+      BaseLogger.warning("Event already in progress. Returning response")
+      idempotency_key = event_data.get("idempotency_key")
+      response = r.get_entry(idempotency_key)
+
+    if event_service.event_is_complete() and event_service.event_exists():
+      # When users already made a request that was complete, we'll generate a new idempotency key and save it in the react state
+
+      idempotency_key = uuid.uuid4()
+      new_event_data = event_data.copy().model_dump() if not isinstance(event_data, dict) else event_data.copy()
+      setattr(new_event_data, "idempotency_key", idempotency_key)
+      response = EventService(current_user, new_event_data).call()
+    else:
+      # when user is making their first request just call event service and return the temporary redis hash while in progress
+      response = event_service.call()
+
+    if not response:
+      raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No response given")
+    return response
   except Exception as e:
-    db.rollback()
-    if "unique constraint" in str(e).lower():
-      raise HTTPException(status_code=409, detail="Duplicate event (Idempotency Key)")
-    raise HTTPException(status_code=500, detail="Internal Server Error")
+    # In prod I wouldn't pass e to the exception
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

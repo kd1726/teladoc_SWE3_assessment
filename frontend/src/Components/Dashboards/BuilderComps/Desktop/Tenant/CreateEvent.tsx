@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { EventType, UsageEventSubmitType } from "@/Types/eventTypes";
 import { CreateEventComponentType } from "@/Types/componentType";
+import { postEventClient } from "@/Components/Clients/Events/eventClient";
+import { UUID } from "crypto";
 
-export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id = 1 }) => {
+export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id }) => {
   const DEFAULT_TOKEN_AMOUNT = 1
   const DEFAULT_TYPE = EventType.calculate
 
@@ -10,7 +12,7 @@ export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id = 1 
   const [type, setType] = useState<EventType>(DEFAULT_TYPE)
   const [prompt, setPrompt] = useState<string>()
   const [requestInProgress, setRequestInProgress] = useState<boolean>(false);
-
+  const [idempotencyKey, setIdempotencyKey] = useState<UUID>();
   const [eventStatus, setEventStatus] = useState()
 
   const eventID = crypto.randomUUID()
@@ -19,14 +21,29 @@ export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id = 1 
     e.preventDefault();
     setRequestInProgress(true)
     let body: UsageEventSubmitType = {
-      event_id: eventID,
-      tenant_id: tenant_id as string,
-      type: type,
+      idempotency_key: idempotencyKey || eventID,
+      tenant_id: tenant_id,
+      prompt_type: type,
       prompt: prompt,
-      amountOftokens: tokenAmount,
-      timestamp: new Date().toISOString()
+      token_cost: tokenAmount,
+      timestamp: new Date()
     }
+    postEventClient(tenant_id, body).then((res) => {
+      const { status, idempotency_key } = res.data
 
+      switch (status) {
+        case "PENDING":
+          setRequestInProgress(true)
+          break;
+        default:
+          setRequestInProgress(false)
+          break
+      }
+      setIdempotencyKey(idempotency_key)
+    }).catch(ers => {
+      console.log(ers)
+      setRequestInProgress(false)
+    })
   }
 
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -68,7 +85,8 @@ export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id = 1 
     </article>
     <article className="submit-section">
       <p>This event will require {tokenAmount} Tokens</p>
-      <input type="submit" role="button" value="Generate" disabled={requestInProgress} />
+      {requestInProgress && <p>Your request is in progress</p>}
+      <input type="submit" role="button" value="Generate" />
     </article>
   </form>
 }

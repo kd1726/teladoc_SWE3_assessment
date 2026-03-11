@@ -1,5 +1,5 @@
 import { DTDUsageComponentType } from "@/Types/componentType"
-import { UsageEventResponseType } from "@/Types/eventTypes"
+import { UsageEventGetResponseType } from "@/Types/eventTypes"
 
 export const DTDUsage: React.FC<DTDUsageComponentType> = ({ events }) => {
 
@@ -16,14 +16,14 @@ export const DTDUsage: React.FC<DTDUsageComponentType> = ({ events }) => {
 
       <tbody className="divide-y divide-gray-200">
         {events?.length && events.length > 0 ?
-          events.map((event: UsageEventResponseType, k: number) => {
-            const { type, amountOfTokens, timestamp, prompt } = event
-            return <tr className="hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3 font-medium text-gray-900">{type}</td>
-              <td className="px-4 py-3 text-gray-700">{amountOfTokens}</td>
+          events.map((event: UsageEventGetResponseType, k: number) => {
+            const { prompt_type, token_cost, timestamp, prompt } = event
+            return <tr className="hover:bg-gray-50 transition-colors" key={k}>
+              <td className="px-4 py-3 font-medium text-gray-900">{prompt_type}</td>
+              <td className="px-4 py-3 text-gray-700">{token_cost}</td>
               <td className="px-4 py-3">
                 <span className="inline-flex items-center rounded-md bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700 ring-1 ring-inset ring-violet-700/10">
-                  {timestamp}
+                  {timestamp as string}
                 </span>
               </td>
               <td className="px-4 py-3 text-gray-500 text-sm">{prompt}</td>

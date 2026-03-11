@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
-from Models.tenants_model import TenantsDB
+from Models.Tenants.models import Tenants
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -9,7 +9,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def seed_data():
     db: Session = SessionLocal()
     
-    db.query(TenantsDB).delete()
+    db.query(Tenants).delete()
 
     users_to_create = [
         {"username": "admin", "password": "admin_password", "role": "admin", "quota": 10000},
@@ -30,7 +30,7 @@ def seed_data():
 
       hashed = pwd_context.hash(password)
 
-      new_user = TenantsDB(
+      new_user = Tenants(
           tenant_id=uuid.uuid4(),
           username=user_data["username"],
           password_hash=hashed,

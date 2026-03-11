@@ -17,7 +17,7 @@ export default function Login(): JSX.Element {
     AuthClient(loginData).then((res) => {
       let { access_token, token_type } = res.data
       access_token && localStorage.setItem("accessToken", access_token)
-      token_type && localStorage.setItem("tokenTyoe", token_type)
+      token_type && localStorage.setItem("tokenType", token_type)
 
       let { role, tenant_id } = jwtDecode<JWTToken>(access_token)
 

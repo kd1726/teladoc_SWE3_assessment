@@ -1,4 +1,4 @@
-import { UsageEventResponseType } from "./eventTypes"
+import { UsageEventGetResponseType } from "./eventTypes"
 import React, { ReactNode } from "react"
 import { TenantDataResponse } from "./tenantTypes"
 
@@ -11,7 +11,7 @@ interface TenantDashboardComponentType {
 }
 
 interface CreateEventComponentType {
-  tenant_id: number | string
+  tenant_id: string
 }
 
 interface ProgressBarComponentType {
@@ -25,7 +25,7 @@ interface QuotaComponentType {
 }
 
 interface DTDUsageComponentType {
-  events: Array<UsageEventResponseType>
+  events: Array<UsageEventGetResponseType>
 }
 
 interface DashboardElementComponentType {
@@ -43,7 +43,7 @@ interface ViewAllTenantsComponentType {
 }
 
 interface UpdateTenantQuotaComponentType {
-  tenant_id: number | string
+  tenant_id: string;
 }
 
 export {

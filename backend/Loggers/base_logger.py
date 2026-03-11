@@ -1,14 +1,14 @@
 import logging
 import colorlog
 from colorlog import ColoredFormatter
-from Config.config import is_debug
+from Config.config import settings
 
 class BaseLogger:
   @classmethod
   def _get_logger(cls):
     logger = logging.getLogger(cls.__name__)
 
-    minimum_level = logging.DEBUG if is_debug() else logging.INFO
+    minimum_level = logging.DEBUG if settings.debug else logging.INFO
     logger.setLevel(minimum_level)
 
     if not logger.handlers:
@@ -37,6 +37,7 @@ class BaseLogger:
           'WARNING':  'yellow',
           'ERROR':    'red',
           'CRITICAL': 'red,bg_white',
+          "EXCEPTION": 'red,bg_black',
         },
         secondary_log_colors={},
         style='%'
@@ -61,5 +62,9 @@ class BaseLogger:
     return cls._get_logger().error(message)
 
   @classmethod
+  def exception(cls, message):
+    return cls._get_logger().exception(f"DO NOT USE IN PROD:{message}")
+
+  @classmethod
   def critical(cls, message):
-    return clas._get_logger().error(message)
+    return cls._get_logger().critical(message)

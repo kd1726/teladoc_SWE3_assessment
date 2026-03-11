@@ -1,15 +1,25 @@
-import { UsageEventResponseType } from "./eventTypes"
+import { UUID } from "crypto";
+import { UsageEventGetResponseType } from "./eventTypes"
 
 interface TenantDataResponse {
-  tenantID: number;
-  monthlyQuota: number;
-  monthToDateUsage: number;
-  events: Array<UsageEventResponseType>;
-  lastActive: string;
-  capacityWarn: boolean;
-  overCapacity: boolean
+  tenant_id: string | UUID;
+  monthly_quota: number;
+  month_to_date_usage: number;
+  remaining_quota: number
+  events: Array<UsageEventGetResponseType>;
+  last_active: string;
+  capacity_warn: boolean;
+  over_capacity: boolean
+}
+
+interface UpdateTenantType {
+  tenant_id: string;
+  reason: string;
+  new_quota: number;
+  allow_overage: boolean
 }
 
 export {
-  TenantDataResponse
+  TenantDataResponse,
+  UpdateTenantType
 }

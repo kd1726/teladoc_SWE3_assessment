@@ -37,6 +37,6 @@
   }
 
   div.base-container {
-    @apply p-0 m-0 w-screen h-screen flex flex-col overflow-hidden;
+    @apply p-0 m-0 w-screen h-screen flex flex-col overflow-x-hidden;
   }
 }

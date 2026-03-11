@@ -1,16 +1,17 @@
 import HTTPClient from "../client";
 import { APIVersion } from "@/Config/config";
+import { UpdateTenantType } from "@/Types/tenantTypes";
 
-export const getOneTenent = (tenent_id: number) => {
-  HTTPClient().get(`${APIVersion}/${tenent_id}`)
+export const getOneTenent = (tenent_id: number | string) => {
+  return HTTPClient().get(`/${APIVersion}/tenants/${tenent_id}`)
 }
 
 export const getAllTenants = () => {
-  HTTPClient().get(`${APIVersion}/tenants`)
+  return HTTPClient().get(`${APIVersion}/tenants`)
 }
 
-export const getRangeofTenants = (tenant_id: string, fromTime: string, toTime: string, granularity: string = "day") => {
-  HTTPClient().get(`${APIVersion}/tenants/${tenant_id}usage`,
+export const getRangeofTenants = (headers, tenant_id: string, fromTime: string, toTime: string, granularity: string = "day") => {
+  return HTTPClient({ customHeaders: headers }).get(`${APIVersion}/tenants/${tenant_id}/usage`,
     {
       params: {
         from_time: fromTime,
@@ -20,8 +21,6 @@ export const getRangeofTenants = (tenant_id: string, fromTime: string, toTime: s
     })
 };
 
-export const updateTenantQuote = (tenant_id: string, newQuota: number) => {
-  return HTTPClient().put(`${APIVersion}/${tenant_id}/quota`, null, {
-    params: { new_quota: newQuota }
-  })
+export const updateTenantQuoteClient = (tenant_id: string, data: UpdateTenantType) => {
+  return HTTPClient().patch(`${APIVersion}/${tenant_id}/quota`, data)
 };
