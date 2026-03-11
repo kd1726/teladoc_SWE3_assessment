@@ -16,9 +16,10 @@ git clone <repository-url>
 cd teladoc_SWE3_assessment
 ```
 
-2. From the root directory, run the startup script:
+2. From the root directory, change the permissions on the file and run the startup script:
 
 ```bash
+sudo chmod 774 ./scripts/start.sh
 ./scripts/start.sh
 ```
 
