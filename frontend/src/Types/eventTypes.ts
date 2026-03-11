@@ -34,9 +34,25 @@ interface UsageEventSubmitType {
   token_cost: number;
 }
 
+enum Granularity {
+  day = "day"
+}
+interface UsageEventRangeTypeSubmit {
+  from_time: Date;
+  to_time: Date;
+  granularity: keyof typeof Granularity,
+}
+
+interface UsageGranularityTypeGet {
+  period: string,
+  total_token_usage: number
+}
+
 export {
   UsageEventGetResponseType,
   UsageEventStatusResponseType,
   UsageEventSubmitType,
-  EventType
+  EventType,
+  UsageEventRangeTypeSubmit,
+  UsageGranularityTypeGet
 }

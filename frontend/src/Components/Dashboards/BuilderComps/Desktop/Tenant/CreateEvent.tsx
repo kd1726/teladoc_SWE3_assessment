@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EventType, UsageEventSubmitType } from "@/Types/eventTypes";
 import { CreateEventComponentType } from "@/Types/componentType";
 import { postEventClient } from "@/Components/Clients/Events/eventClient";
 import { UUID } from "crypto";
 
-export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id }) => {
+export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id, mq, mtq }) => {
   const DEFAULT_TOKEN_AMOUNT = 1
   const DEFAULT_TYPE = EventType.calculate
 
@@ -12,16 +12,17 @@ export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id }) =
   const [type, setType] = useState<EventType>(DEFAULT_TYPE)
   const [prompt, setPrompt] = useState<string>()
   const [requestInProgress, setRequestInProgress] = useState<boolean>(false);
-  const [idempotencyKey, setIdempotencyKey] = useState<UUID>();
-  const [eventStatus, setEventStatus] = useState()
+  const [pendingMessage, setPendingMessage] = useState<string>();
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const eventID = crypto.randomUUID()
+  const idempotencyRef = useRef<UUID | string>(null)
 
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setRequestInProgress(true)
     let body: UsageEventSubmitType = {
-      idempotency_key: idempotencyKey || eventID,
+      idempotency_key: idempotencyRef.current || eventID,
       tenant_id: tenant_id,
       prompt_type: type,
       prompt: prompt,
@@ -31,19 +32,30 @@ export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id }) =
     postEventClient(tenant_id, body).then((res) => {
       const { status, idempotency_key } = res.data
 
-      switch (status) {
-        case "PENDING":
-          setRequestInProgress(true)
+      switch (res.status) {
+        case 202:
+          setPendingMessage("Your request is pending")
           break;
+        case 201:
+          setPendingMessage("Your request have been initiated")
         default:
-          setRequestInProgress(false)
+          console.log("Looks like theres a problem")
           break
       }
-      setIdempotencyKey(idempotency_key)
+      idempotencyRef.current = idempotency_key
     }).catch(ers => {
-      console.log(ers)
-      setRequestInProgress(false)
+      switch (ers.status) {
+        case 409:
+          setErrorMessage(`You've reached your max monthly quota. Remaining Tokens: ${mq - mtq}`)
+          break;
+        case 500:
+          setErrorMessage("There is a problem somewhere")
+
+        default:
+          console.log(ers)
+      }
     })
+    setRequestInProgress(false)
   }
 
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -86,6 +98,8 @@ export const CreateEvent: React.FC<CreateEventComponentType> = ({ tenant_id }) =
     <article className="submit-section">
       <p>This event will require {tokenAmount} Tokens</p>
       {requestInProgress && <p>Your request is in progress</p>}
+      {errorMessage && <p className="text-red-700">{errorMessage}</p>}
+      {pendingMessage && <p className="text-teladoc-pulse-light">{pendingMessage}</p>}
       <input type="submit" role="button" value="Generate" />
     </article>
   </form>

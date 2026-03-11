@@ -6,11 +6,12 @@ import { ViewAllTenants } from "../BuilderComps/Desktop/Admin/ViewAllTenants"
 import TenantDashboard from "./TenantDashboard"
 import { UpdateTenantQuota } from "../BuilderComps/Desktop/Admin/UpdateTenentQuota"
 import { getAllTenants } from "@/Components/Clients/Tenants/tenantClient"
+import ViewTenantEvents from "../BuilderComps/Desktop/Admin/ViewTenantEvents"
+import { AuditView } from "../BuilderComps/Desktop/Admin/AuditView"
 
 export default function AdminDashboard(): JSX.Element {
   const [allTenants, setAllTenants] = useState<Array<TenantDataResponse>>();
   const [selectedTenant, setSelectedTenant] = useState<TenantDataResponse>()
-  const currentTenantRef = useRef<TenantDataResponse>(null);
 
   let token = localStorage.getItem("accessToken")
   let id = localStorage.getItem("tenantId")
@@ -33,17 +34,14 @@ export default function AdminDashboard(): JSX.Element {
     }) : window.location.replace("/")
   }, [])
 
-  useEffect(() => {
-    currentTenantRef.current = selectedTenant
-    console.log(currentTenantRef.current)
-  }, [selectedTenant])
-
   return <>
     <Navigation isAdmin={true} />
     {allTenants ? <div className="admin-desktop-dashboard">
       <AdminDashBoardElement title="Tenants" component={<ViewAllTenants tenants={allTenants} selectTenant={setSelectedTenant} />} />
-      <AdminDashBoardElement title="Tenant Dashboard" version={2} component={selectedTenant ? <TenantDashboard adminTenantData={currentTenantRef.current} /> : <></>} />
-      {currentTenantRef.current && <AdminDashBoardElement title="Upgrade Tenant Quota" version={2} component={<UpdateTenantQuota tenant_id={selectedTenant.tenant_id} />} />}
+      <AdminDashBoardElement title="Tenant Dashboard" version={2} component={selectedTenant ? <TenantDashboard adminTenantData={selectedTenant} /> : <></>} />
+      {selectedTenant && <AdminDashBoardElement title="View Tenant Bucket Usage" version={2} component={selectedTenant ? <ViewTenantEvents tenant_id={selectedTenant.tenant_id} /> : <></>} />}
+      {selectedTenant && <AdminDashBoardElement title="Upgrade Tenant Quota" version={2} component={<UpdateTenantQuota tenant_id={selectedTenant.tenant_id} quota={selectedTenant.monthly_quota} allow_overage={selectedTenant.allow_overage} />} />}
+      <AdminDashBoardElement title="View Audit Trail" version={2} component={<AuditView />} />
     </div> : <></>}
   </>
 }

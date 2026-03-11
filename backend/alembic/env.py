@@ -5,6 +5,7 @@ from alembic import context
 from database import Base
 from Models.Events.models import *
 from Models.Tenants.models import *
+from Models.Audits.models import *
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

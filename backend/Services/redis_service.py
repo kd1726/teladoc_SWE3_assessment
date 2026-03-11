@@ -39,17 +39,19 @@ class RedisService:
 
   def get_entry(self, key, sub_key=None):
     try:
-      entry = self.__redis_get(key)
+      entry = self.__redis_get(str(key))
       return entry
     except ResponseError:
       self.logger.warning("Redis get failing. Attempting hget")
-      entry = self.__redis_hget(key)
-      return entry
+      entry = self.__redis_hget(str(key))
+      if entry:
+        return entry
+      return None
     except redis.ConnectionError:
       self.logger.error("Could not connect with redis")
-
     except Exception as e:
-      self.logger.warning(f"Something is wrong with redis...")
+      self.logger.warning(f"Redis entry not found...")
+      return None
 
   def delete_entry(self, key):
     try:
@@ -89,9 +91,9 @@ class RedisService:
     if sub_key:
       entry = self.redis_client.hget(key, sub_key)
       return entry
-    entry = self.redis_client.hget(key)
-    self.logger.info("hget successful. Redis entry Found!")
-    self.redis_client.close()
+    entry = self.redis_client.hgetall(key)
     if entry:
-      return entry
-    raise Exception
+      self.logger.info("hget successful. Redis entry Found!")
+    else:
+      entry = None
+    return entry

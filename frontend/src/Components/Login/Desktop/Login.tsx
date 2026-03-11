@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import { AuthClient } from "@/Components/Clients/Auth/authClient";
 import { AuthType } from "@/Types/authTypes";
 import { REACT_BASE_URL } from "@/Config/config";
@@ -6,7 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import { JWTToken } from "@/Types/authTypes";
 
 export default function Login(): JSX.Element {
-
+  const [authFailed, setAuthFailed] = useState<boolean>(false);
   const handleSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const loginData: AuthType = {
@@ -31,6 +31,7 @@ export default function Login(): JSX.Element {
         window.location.href = `${REACT_BASE_URL}/dashboard`
       }
     }).catch((ers) => {
+      setAuthFailed(true)
       console.log(ers)
     })
   }
@@ -50,6 +51,7 @@ export default function Login(): JSX.Element {
           <input type="password" name="password" data-testid="password-field" required />
         </article>
         <article className="submit-container">
+          {authFailed && <p className="text-red-500">Wrong user name or password</p>}
           <input type="submit" role="button" data-testid="submit-button" value="Authenticate" />
         </article>
       </form>

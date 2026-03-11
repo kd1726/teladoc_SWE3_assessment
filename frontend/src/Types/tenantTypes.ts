@@ -10,12 +10,15 @@ interface TenantDataResponse {
   last_active: string;
   capacity_warn: boolean;
   over_capacity: boolean
+  allow_overage: boolean;
 }
 
 interface UpdateTenantType {
   tenant_id: string;
   reason: string;
   new_quota: number;
+  old_quota: number;
+  timestamp: Date
   allow_overage: boolean
 }
 

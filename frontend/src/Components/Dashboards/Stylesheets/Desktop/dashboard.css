@@ -3,5 +3,5 @@ div.desktop-dashboard {
 }
 
 div.admin-desktop-dashboard {
-  @apply w-[95%] h-screen mt-5 grid grid-cols-2 grid-rows-2 gap-x-[5vw] gap-y-[1vw] pl-[2%];
+  @apply w-[95%] h-screen mt-5 grid grid-cols-2 grid-rows-3 gap-x-[5vw] gap-y-[1vw] pl-[2%] overflow-y-scroll;
 }

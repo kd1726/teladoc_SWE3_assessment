@@ -13,7 +13,7 @@ class TenantBase(BaseModel):
 
 class TenantGet(TenantBase):
   model_config = ConfigDict(from_attributes=True)
-  
+  allow_overage: bool
 
   @computed_field
   @property
@@ -41,6 +41,9 @@ class TenantGet(TenantBase):
   def over_capacity(self) ->bool:
     return self.month_to_date_usage >= self.monthly_quota
 
+class TenantGetPrivate(TenantGet):
+  model_config = ConfigDict(from_attributes=True)
+  role: str
 
 class TenantPost(TenantBase):
   model_config = ConfigDict(from_attributes=True)
@@ -52,6 +55,8 @@ class TenantQuotaUpdate(BaseModel):
 
   tenant_id: UUID
   reason :str = Field(min_length=10, max_length=500)
+  old_quota: int = Field(ge=0)
   new_quota :int = Field(gt=0)
+  timestamp: datetime
   allow_overage :bool
 

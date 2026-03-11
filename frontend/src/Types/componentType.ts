@@ -12,6 +12,8 @@ interface TenantDashboardComponentType {
 
 interface CreateEventComponentType {
   tenant_id: string
+  mtq: number,
+  mq: number
 }
 
 interface ProgressBarComponentType {
@@ -44,6 +46,12 @@ interface ViewAllTenantsComponentType {
 
 interface UpdateTenantQuotaComponentType {
   tenant_id: string;
+  allow_overage: boolean;
+  quota: number
+}
+
+interface ViewTenantEventsComponentType {
+  tenant_id: string
 }
 
 export {
@@ -56,5 +64,6 @@ export {
   ViewAllTenantsComponentType,
   TenantDashboardComponentType,
   UpdateTenantQuotaComponentType,
-  NavigationComponentType
+  NavigationComponentType,
+  ViewTenantEventsComponentType
 }

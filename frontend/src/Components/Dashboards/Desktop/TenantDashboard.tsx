@@ -33,7 +33,7 @@ export default function TenantDashboard({ adminTenantData = null }: TenantDashbo
         console.error(ers)
       }) :
       window.location.replace("/")
-  }, [])
+  }, [adminTenantData])
 
   useEffect(() => {
     tenantData?.events &&
@@ -47,7 +47,7 @@ export default function TenantDashboard({ adminTenantData = null }: TenantDashbo
       <DashBoardElement title="Monthly To Date Usage" component={<ProgressBar percentage={(tenantData.month_to_date_usage / tenantData.monthly_quota) * 100} />} />
       <DashBoardElement title="Total Monthly Quota" component={<Quota mq={tenantData.monthly_quota} mq_used={tenantData.month_to_date_usage} mq_remaining={tenantData.remaining_quota} />} />
       <DashBoardElement title="Day By Day Usage" component={<DTDUsage events={tenantEvents} />} />
-      {!adminTenantData && <DashBoardElement title="Create Event" component={<CreateEvent tenant_id={id} />} />}
+      {!adminTenantData && <DashBoardElement title="Create Event" component={<CreateEvent tenant_id={id} mq={tenantData.monthly_quota} mtq={tenantData.month_to_date_usage} />} />}
     </div> : <></>}
   </>
 }

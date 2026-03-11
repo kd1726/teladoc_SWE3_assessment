@@ -1,6 +1,7 @@
 import Routers.v1.auth_routers as auth_routers
 import Routers.v1.tenant_routers as tenant_routers
 import Routers.v1.events_routers as events_routers
+import Routers.v1.audit_routers as audit_routers
 from fastapi import FastAPI, Depends, status
 from database import engine, Base
 from Config.config import settings
@@ -24,6 +25,7 @@ app.add_middleware(
 app.include_router(auth_routers.router, prefix=f"/{settings.version}/authenticate", tags=["Auth"])
 app.include_router(tenant_routers.router, prefix=f"/{settings.version}/tenants", tags=["Tenants"])
 app.include_router(events_routers.router, prefix=f"/{settings.version}", tags=["Events/Usage"])
+app.include_router(audit_routers.router, prefix=f"/{settings.version}/audits", tags=["Audit_Records"])
 
 @app.get(f"/{settings.version}/health", status_code=status.HTTP_200_OK)
 def health():

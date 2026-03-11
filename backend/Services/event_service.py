@@ -10,6 +10,7 @@ from celery import chain
 from celery_provider import celery_provider
 from Loggers.base_logger import BaseLogger
 from ipdb import set_trace
+from database import SessionLocal
 
 class EventService:
   def __init__(self, user: Tenants, event_data: EventPost):
@@ -21,7 +22,7 @@ class EventService:
 
     self.redis_client = RedisService()
     
-    self.idempotency_key = event_data.get("idempotency_key")
+    self.idempotency_key = str(event_data.get("idempotency_key"))
 
     if not self.idempotency_key:
       raise HTTPException(
@@ -29,32 +30,27 @@ class EventService:
         detail="Idempotency key not submitted")
 
   def no_more_quota(self):
-    if self.user.allow_overage:
-      return True
+    if self.user.allow_overage or self.user.role == "admin":
+      return False
     return (self.user.month_to_date_usage + self.event_data.get("token_cost")) > self.user.monthly_quota
   
   def event_is_pending(self):
-    response = celery_provider.AsyncResult(self.idempotency_key)
-    
-    if response.state in ['SUCCESS', 'FAILURE', 'REVOKED']:
+    if not self.redis_client.get_entry(self.idempotency_key):
         return False
-        
-    if response.state == 'STARTED':
-        return True
-    return response.result is not None
+    response = celery_provider.AsyncResult(str(self.idempotency_key))
+    return response.state in ["PENDING", "STARTED", "RECEIVED", "RETRY"]
 
   def event_is_complete(self):
     response = celery_provider.AsyncResult(self.idempotency_key)
-    if response.state in ['SUCCESS', 'FAILURE', 'REVOKED']:
-        return True
-    return response.result is None
+    return response.state in ['SUCCESS', 'FAILURE', 'REVOKED']
   
   def event_exists(self):
     try:
-      logged_event = db.execute(select(Events).where(Events.idempotency_key == self.idempotency_key)).scalars().first()
-      if logged_event:
-        return logged_event
-      return False
+      with SessionLocal() as db:
+        logged_event = db.execute(select(Events).where(Events.idempotency_key == self.idempotency_key)).scalars().first()
+        if logged_event:
+          return logged_event
+        return False
     except Exception:
       return False
 
@@ -80,7 +76,7 @@ class EventService:
       duration_to_complete = 5
       self.redis_client.create_entry(self.idempotency_key, self.event_data)
       task_job = calculate_event_job.s(self.user.tenant_id, duration_to_complete)
-      self.__task_chainer(task_job).apply_async(task_id=self.idempotency_key)
+      self.__task_chainer(task_job).apply_async(task_id=str(self.idempotency_key))
       return self.event_data
     except Exception as e:
       self.redis_client.delete_entry(self.idempotency_key)
@@ -92,7 +88,7 @@ class EventService:
       duration_to_complete = 10
       self.redis_client.create_entry(self.idempotency_key, self.event_data)
       task_job = mcp_request_event_job.s(self.user.tenant_id, duration_to_complete)
-      result = self.__task_chainer(task_job).apply_async(task_id=self.idempotency_key)
+      result = self.__task_chainer(task_job).apply_async(task_id=str(self.idempotency_key))
       print(f"Backend type: {type(result.backend)}")
       return self.event_data
     except Exception as e:
@@ -105,7 +101,7 @@ class EventService:
       duration_to_complete = 15
       self.redis_client.create_entry(self.idempotency_key, self.event_data)
       task_job = llm_request_event_job.s(self.user.tenant_id, duration_to_complete)
-      self.__task_chainer(task_job).apply_async(task_id=self.idempotency_key)
+      self.__task_chainer(task_job).apply_async(task_id=str(self.idempotency_key))
       return self.event_data
     except Exception as e:
       self.redis_client.delete_entry(self.idempotency_key)

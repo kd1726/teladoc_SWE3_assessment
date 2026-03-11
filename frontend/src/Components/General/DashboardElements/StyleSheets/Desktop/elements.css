@@ -77,7 +77,7 @@ form.event-form {
   }
 
   article.submit-section {
-    @apply w-full h-[20%] flex flex-col items-center justify-center;
+    @apply w-full h-[30%] flex flex-col items-center justify-center;
 
     p {
       @apply text-teladoc-pulse;
@@ -85,7 +85,7 @@ form.event-form {
     }
 
     input[type="submit"] {
-      @apply w-1/5 h-full bg-teladoc-pulse rounded-xl text-white;
+      @apply w-1/5 h-1/2 bg-teladoc-pulse rounded-xl text-white;
       font-size: var(--desktop-text-font-size);
       transition: background-color 500ms;
     }

@@ -2,8 +2,9 @@ import { UpdateTenantQuotaComponentType } from "@/Types/componentType";
 import { UpdateTenantType } from "@/Types/tenantTypes";
 import { useState } from "react";
 import { updateTenantQuoteClient } from "@/Components/Clients/Tenants/tenantClient";
+import { timeStamp } from "console";
 
-export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ tenant_id }) => {
+export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ tenant_id, allow_overage, quota }) => {
   const [requestInProgress, setRequestInProgress] = useState<boolean>(false);
   const [reason, setReason] = useState<string>()
   const [successMessage, setSuccessMessage] = useState<string>()
@@ -13,6 +14,8 @@ export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ te
     setRequestInProgress(true)
     let body: UpdateTenantType = {
       reason: reason,
+      old_quota: quota,
+      timestamp: new Date(),
       new_quota: e.currentTarget?.quota_amount?.value,
       allow_overage: e.currentTarget?.overage?.checked || false,
       tenant_id: tenant_id
@@ -28,7 +31,6 @@ export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ te
     })
     setRequestInProgress(false)
   }
-
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     let value = e.currentTarget.value
     setReason(value)
@@ -48,8 +50,9 @@ export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ te
     <article className="submit-section">
       <section className="checkbox-section">
         <label>Allow Overage:</label>
-        <input type="checkbox" name="overage" />
+        <input type="checkbox" name="overage" defaultChecked={allow_overage} />
       </section>
+      <p>Overage status is currently: {`${allow_overage}`}</p>
       {successMessage && <p>{successMessage}</p>}
       <input type="submit" role="button" value="Update" disabled={requestInProgress} />
     </article>

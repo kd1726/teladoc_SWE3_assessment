@@ -1,4 +1,4 @@
-from pydantic import Field, BaseModel, ConfigDict
+from pydantic import Field, BaseModel, ConfigDict, field_validator
 from datetime import datetime
 from uuid import UUID
 from enum import Enum
@@ -43,7 +43,26 @@ class EventPost(BaseModel):
   timestamp: datetime
   status: Optional[StatusType] = None
 
+  @field_validator("timestamp")
+  @classmethod
+  def validate_event_time(cls, current_time: datetime):
+    now = datetime.now(timezone.utc)
+    
+    if current_time > now + timedelta(minutes=5):
+        raise ValueError("Event timestamp cannot be more than 5 minutes in the future")
+        
+    if current_time < now - timedelta(days=30):
+        raise ValueError("Event timestamp cannot be more than 30 days in the past")
+      
+    return current_time
+
 
 class EventResponse(EventBase):
   model_config = ConfigDict(from_attributes=True)
+
+class EventGranularitResponse(BaseModel):
+  model_config = ConfigDict(from_attributes=True)
+
+  period: datetime
+  total_token_usage: int
   

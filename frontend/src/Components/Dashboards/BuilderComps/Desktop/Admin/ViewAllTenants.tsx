@@ -42,5 +42,5 @@ type CircleStatusType = {
 }
 
 const CircleStatus: React.FC<CircleStatusType> = ({ warn, over }) => {
-  return <span className={warn ? "warn" : over ? "over" : ""} title={warn ? "WARNING" : over ? "EXCEEDED" : ""} />
+  return <span className={over ? "over" : warn ? "warn" : ""} title={warn ? "WARNING" : over ? "EXCEEDED" : ""} />
 }

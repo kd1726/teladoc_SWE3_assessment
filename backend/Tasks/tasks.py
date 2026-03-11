@@ -58,7 +58,6 @@ def save_event_to_db_and_update_user(self, event_data: dict):
       db.commit()
       db.refresh(new_event)
       BaseLogger.info("Event save and monthly quota update Successful!")
-      RedisService().delete_entry(event_data.get("idempotency_key"))
       return {"status": "successful!"}
     except Exception as e:
       BaseLogger.warning("Updating and Save request failed.. Rolling back DB changes")
