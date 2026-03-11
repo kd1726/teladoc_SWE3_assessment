@@ -40,8 +40,9 @@ interface AdminDashboardElementComponentType extends DashboardElementComponentTy
 }
 
 interface ViewAllTenantsComponentType {
-  tenants: Array<TenantDataResponse>,
-  selectTenant: React.Dispatch<React.SetStateAction<TenantDataResponse>>
+  tenants: Array<TenantDataResponse>;
+  selectTenant: React.Dispatch<React.SetStateAction<TenantDataResponse>>;
+  selectedTenant: TenantDataResponse
 }
 
 interface UpdateTenantQuotaComponentType {

@@ -1,7 +1,7 @@
 import { ViewAllTenantsComponentType } from "@/Types/componentType"
 import { TenantDataResponse } from "@/Types/tenantTypes"
 
-export const ViewAllTenants: React.FC<ViewAllTenantsComponentType> = ({ tenants = [], selectTenant }) => {
+export const ViewAllTenants: React.FC<ViewAllTenantsComponentType> = ({ tenants = [], selectTenant, selectedTenant }) => {
   return <main className="view-all-tenants-section">
     <table className="min-w-full divide-y divide-gray-200 bg-white text-sm rounded-2xl">
       <thead className="bg-gray-50">
@@ -18,7 +18,7 @@ export const ViewAllTenants: React.FC<ViewAllTenantsComponentType> = ({ tenants 
         {
           tenants && tenants.length > 0 ? tenants.map((tenant: TenantDataResponse) => {
             const { tenant_id, monthly_quota, month_to_date_usage, last_active, over_capacity, capacity_warn } = tenant
-            return <tr className="hover:bg-gray-50 transition-colors hover:cursor-pointer" onClick={() => selectTenant(() => tenant)}>
+            return <tr className={`hover:bg-gray-50 transition-colors hover:cursor-pointer ${tenant == selectedTenant ? "bg-sky-300" : ""}`} onClick={() => selectTenant(() => tenant)}>
               <td className="px-4 py-3 font-medium text-gray-900">{tenant_id}</td>
               <td className="px-4 py-3 flex justify-center items-center"><CircleStatus over={over_capacity} warn={capacity_warn} /></td>
               <td className="px-4 py-3 font-medium text-gray-900">{month_to_date_usage}</td>

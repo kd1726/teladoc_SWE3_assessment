@@ -37,7 +37,7 @@ export default function AdminDashboard(): JSX.Element {
   return <>
     <Navigation isAdmin={true} />
     {allTenants ? <div className="admin-desktop-dashboard">
-      <AdminDashBoardElement title="Tenants" component={<ViewAllTenants tenants={allTenants} selectTenant={setSelectedTenant} />} />
+      <AdminDashBoardElement title="Tenants" component={<ViewAllTenants tenants={allTenants} selectTenant={setSelectedTenant} selectedTenant={selectedTenant} />} />
       <AdminDashBoardElement title="Tenant Dashboard" version={2} component={selectedTenant ? <TenantDashboard adminTenantData={selectedTenant} /> : <></>} />
       {selectedTenant && <AdminDashBoardElement title="View Tenant Bucket Usage" version={2} component={selectedTenant ? <ViewTenantEvents tenant_id={selectedTenant.tenant_id} /> : <></>} />}
       {selectedTenant && <AdminDashBoardElement title="Upgrade Tenant Quota" version={2} component={<UpdateTenantQuota tenant_id={selectedTenant.tenant_id} quota={selectedTenant.monthly_quota} allow_overage={selectedTenant.allow_overage} />} />}

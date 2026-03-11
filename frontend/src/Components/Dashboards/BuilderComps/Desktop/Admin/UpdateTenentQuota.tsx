@@ -27,6 +27,9 @@ export const UpdateTenantQuota: React.FC<UpdateTenantQuotaComponentType> = ({ te
         setSuccessMessage(`${status}, New Quota for tenant ${tenant_id}: ${new_quota}`)
       }
     }).catch((ers) => {
+      if (ers.status == 401) {
+        window.location.replace("/")
+      }
       console.error(ers)
     })
     setRequestInProgress(false)

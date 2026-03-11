@@ -6,6 +6,7 @@ import { JSX, useState } from "react";
 export default function ViewTenantEvents({ tenant_id }: ViewTenantEventsComponentType): JSX.Element {
   const [events, setEvents] = useState<Array<UsageGranularityTypeGet>>();
   const [requestInProgress, setRequestInProgress] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>()
 
   const now = new Date();
   const yesterday = new Date(now.getTime() - (1 * 24 * 60 * 60 * 1000));
@@ -31,6 +32,9 @@ export default function ViewTenantEvents({ tenant_id }: ViewTenantEventsComponen
         setEvents(res.data)
       }
     }).catch(ers => {
+      if (ers.status === 403 || ers.status === 403) {
+        setErrorMessage("Resource is resricted")
+      }
       console.error(ers)
     })
     setRequestInProgress(false)
@@ -79,7 +83,7 @@ export default function ViewTenantEvents({ tenant_id }: ViewTenantEventsComponen
             }) :
             <tr>
               <td colSpan={4} className="px-4 py-8 text-center text-gray-500 italic">
-                No data available
+                {errorMessage ? errorMessage : "No data available"}
               </td>
             </tr>
           }
