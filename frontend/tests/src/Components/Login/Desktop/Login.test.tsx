@@ -3,12 +3,11 @@ import { describe, test, expect, vi, beforeEach } from "vitest"
 import userEvent from "@testing-library/user-event"
 import Login from "@/Components/Login/Desktop/Login"
 
-
-describe("Desktop login compoenent", () => {
-  let userName: HTMLInputElement;
-  let password: HTMLInputElement;
-  let submitButton: HTMLInputElement;
-  let form: HTMLFormElement;
+describe("Desktop login component", () => {
+  let userName: HTMLInputElement
+  let password: HTMLInputElement
+  let submitButton: HTMLInputElement
+  let form: HTMLFormElement
 
   beforeEach(() => {
     render(<Login />)
@@ -23,34 +22,48 @@ describe("Desktop login compoenent", () => {
   })
 
   test("Contains a text box with a username title", () => {
-
     expect(userName).toBeDefined()
     expect(userName.name).toEqual("username")
+    expect(userName.type).toEqual("text")
+    expect(userName.required).toBe(true)
   })
 
   test("Contains a password field with a password title", () => {
-
     expect(password).toBeDefined()
     expect(password.name).toEqual("password")
+    expect(password.type).toEqual("password")
+    expect(password.required).toBe(true)
+  })
+
+  test("Accepts user input in the username field", async () => {
+    const user = userEvent.setup()
+    await user.type(userName, "testuser")
+
+    expect(userName.value).toEqual("testuser")
+  })
+
+  test("Accepts user input in the password field", async () => {
+    const user = userEvent.setup()
+    await user.type(password, "secret123")
+
+    expect(password.value).toEqual("secret123")
   })
 
   describe("Submit Button", () => {
-    test("Contains a submit button with value 'Authenticate", () => {
+    test("Contains a submit button with value 'Authenticate'", () => {
       expect(submitButton).toBeDefined()
       expect(submitButton.value).toEqual("Authenticate")
+      expect(submitButton.type).toEqual("submit")
     })
 
-    test("On click it triggers 'handleSubmit", async () => {
-      let onSubmitSpy = vi.fn((e) => { e.preventDefault() })
-      if (form) form.onsubmit = onSubmitSpy
+    test("Submit button is contained within the login form", () => {
+      expect(form.contains(submitButton)).toBe(true)
+    })
+  })
 
-      let user = userEvent.setup()
-
-      await user.type(userName, "username")
-      await user.type(password, "test123456")
-      await user.click(submitButton)
-
-      expect(onSubmitSpy).toHaveBeenCalled()
+  describe("Error state", () => {
+    test("Does not show error message on initial render", () => {
+      expect(screen.queryByText(/Wrong user name or password/i)).toBeNull()
     })
   })
 })

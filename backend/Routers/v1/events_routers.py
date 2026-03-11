@@ -27,7 +27,6 @@ def post_event(tenent_id: str, event_data: EventPost, db:Annotated[Session, Depe
     r = RedisService()
     response = None
 
-    # set_trace()
     if event_service.no_more_quota():
       BaseLogger.error("Quota exceeded. Enable overage or upgrade plan.")
       raise HTTPException(

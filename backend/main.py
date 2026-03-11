@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from Services.db_health_service import DbHealthService
 from datetime import datetime
 from typing import Annotated
+from Middleware.observability import OberservabilityMiddleware
 
 Base.metadata.create_all(bind=engine)
 
@@ -16,11 +17,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://localhost"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_methods=["GET", "POST", "PUT", "PATCH"],
+    allow_headers=["Authorization", "Content-Type", "Accept"]
 )
+app.add_middleware(OberservabilityMiddleware)
 
 app.include_router(auth_routers.router, prefix=f"/{settings.version}/authenticate", tags=["Auth"])
 app.include_router(tenant_routers.router, prefix=f"/{settings.version}/tenants", tags=["Tenants"])
